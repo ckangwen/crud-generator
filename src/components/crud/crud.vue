@@ -91,11 +91,13 @@
         </el-table-column>
 
         <!-- 操作列 -->
-        <el-table-column
-          v-if="showDelete || deleteContent || showUpdate || updateContent"
-          label="操作"
-          v-bind="extraColumnProps"
-        >
+        <el-table-column v-bind="extraColumnProps">
+          <template slot="header">
+            <template v-if="actionHeadContent">
+              <vnodes :render="actionHeadContent" />
+            </template>
+            <span v-else>操作</span>
+          </template>
           <!-- 删除操作 -->
           <template slot-scope="scope">
             <template v-if="showDelete || deleteContent">

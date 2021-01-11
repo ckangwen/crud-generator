@@ -6,7 +6,7 @@ import VueCompositionApi from "@vue/composition-api";
 import ElementUI from "element-ui";
 
 import "@/assets/styles/flex.css";
-import "element-ui/lib/theme-chalk/index.css";
+import "@/assets/styles/theme/index.css";
 
 Vue.config.productionTip = false;
 Vue.use(VueCompositionApi);
