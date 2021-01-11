@@ -1,0 +1,55 @@
+
+.flex {
+  display: flex;
+}
+.flex.dir-left {
+  flex-direction: row;
+}
+.flex.dir-right {
+  flex-direction: row-reverse;
+}
+.flex.dir-top {
+  flex-direction: column;
+}
+.flex.dir-bottom {
+  flex-direction: column-reverse;
+}
+.flex.main-left {
+  justify-content: flex-start;
+}
+.flex.main-right {
+  justify-content: flex-end;
+}
+.flex.main-center {
+  justify-content: center;
+}
+.flex.main-between {
+  justify-content: space-between;
+}
+.flex.main-around {
+  justify-content: space-around;
+}
+.flex.cross-left {
+  align-items: flex-start;
+}
+.flex.cross-right {
+  align-items: flex-end;
+}
+.flex.cross-center {
+  align-items: center;
+}
+.flex.cross-between {
+  align-items: space-between;
+}
+.flex.cross-around {
+  align-items: space-around;
+}
+
+/*子项会增长变大占据flex容器中额外的剩余空间（flex-grow:1），会收缩变小以适合容器*/
+.flex-stretch {
+  flex: 1 1 auto;
+}
+/* 子项会不会增长变大占据flex容器中额外的剩余空间（flex-grow:0），也不会收缩变小以适合容器 */
+.flex-auto {
+  flex: 0 0 auto;
+}
