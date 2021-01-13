@@ -4,7 +4,7 @@ import {
   reactive,
   ref,
   watch,
-  computed
+  computed,
 } from "@vue/composition-api";
 import useTable, { fakerDataMap } from "@/use/useTable";
 
@@ -13,12 +13,14 @@ import CellDialog, { CellDialogConfirmType } from "@/components/CellDialog";
 import Preview from "@/components/Preview";
 
 import styles from "./index.module.scss";
+import { generateSFC, SlotType } from '../lib/generator.sfc';
 
 export type CellSlotType = {
   [K in string]: {
     actived: boolean;
     componentName: string;
     componentProps: Record<string, any>;
+    usedProp: string
   };
 };
 type ActionButtonTypeEnums = "dialog" | "link" | "none";
@@ -31,18 +33,18 @@ const CrudActionDialog = defineComponent({
   props: {
     visible: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   setup(props, ctx) {
     const dialogForm = ref({
       text: "",
-      action: ""
+      action: "",
     });
     const buttonClickAction = ref([
       { label: "唤起弹窗", value: "dialog" },
       { label: "页面跳转", value: "link" },
-      { label: "无操作", value: "none" }
+      { label: "无操作", value: "none" },
     ]);
     const dialogState = ref({
       visible: false,
@@ -50,17 +52,17 @@ const CrudActionDialog = defineComponent({
         ctx.emit("update:visible", !props.visible);
         ctx.emit("confirm", {
           text: dialogForm.value.text,
-          type: dialogForm.value.action
+          type: dialogForm.value.action,
         });
       },
       onCancel() {
         ctx.emit("update:visible", !props.visible);
-      }
+      },
     });
     return {
       dialogState,
       dialogForm,
-      buttonClickAction
+      buttonClickAction,
     };
   },
   render() {
@@ -89,7 +91,7 @@ const CrudActionDialog = defineComponent({
           </el-form-item>
           <el-form-item label="点击操作" prop="type">
             <el-select style="width: 200px;" vModel={this.dialogForm.action}>
-              {this.buttonClickAction.map(item => {
+              {this.buttonClickAction.map((item) => {
                 return (
                   <el-option
                     key={item.value}
@@ -119,22 +121,22 @@ const CrudActionDialog = defineComponent({
         </el-form>
       </el-dialog>
     );
-  }
+  },
 });
 
 const CreateColumnDialog = defineComponent({
   props: {
     visible: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
   },
   setup(props, ctx) {
     const createColumnState = reactive({
       formData: {
         label: "",
         prop: "",
-        mockType: "string"
+        mockType: "string",
       },
       visible: false,
       create() {
@@ -146,13 +148,13 @@ const CreateColumnDialog = defineComponent({
           ctx.emit("confirm", createColumnState.formData);
         }
         ctx.emit("update:visible", !createColumnState.visible);
-      }
+      },
     });
     const fakerTypes = Object.keys(fakerDataMap);
 
     return {
       createColumnState,
-      fakerTypes
+      fakerTypes,
     };
   },
   render() {
@@ -184,7 +186,7 @@ const CreateColumnDialog = defineComponent({
               style="width: 200px;"
               vModel={this.createColumnState.formData.mockType}
             >
-              {this.fakerTypes.map(item => {
+              {this.fakerTypes.map((item) => {
                 return (
                   <el-option key={item} label={item} value={item}></el-option>
                 );
@@ -213,14 +215,14 @@ const CreateColumnDialog = defineComponent({
         </el-form>
       </el-dialog>
     );
-  }
+  },
 });
 
 export default defineComponent({
   components: {
     Crud,
     CrudActionDialog,
-    CreateColumnDialog
+    CreateColumnDialog,
   },
   setup() {
     const { columns, columnKeys, fetch, columnMock } = useTable();
@@ -235,12 +237,12 @@ export default defineComponent({
       },
       {
         immediate: true,
-        deep: true
+        deep: true,
       }
     );
 
     const onColumnKeyChange = (val: any) => {
-      columns.value = columns.value.filter(item => {
+      columns.value = columns.value.filter((item) => {
         return val.indexOf(item.prop) > -1;
       });
     };
@@ -249,21 +251,24 @@ export default defineComponent({
       visible: false,
       onConfirm(data: any) {
         Vue.set(columnMock.value, data.prop, data.mockType);
-        columns.value.push(data);
-      }
+        columns.value.push({
+          label: data.label,
+          prop: data.prop
+        });
+      },
     });
     const tableProps = {
       "cell-class-name": ({ row, column, rowIndex, columnIndex }: any) => {
         row.$index = rowIndex;
         column.$index = columnIndex;
-      }
+      },
     };
 
     const cellContentState = ref({
       prop: "",
       row: {},
       column: {},
-      visible: false
+      visible: false,
     });
     const onCellDblclick = (row: any, col: any) => {
       cellContentState.value.visible = true;
@@ -278,23 +283,27 @@ export default defineComponent({
      */
     watch(
       columnKeys,
-      val => {
+      (val) => {
         cellSlotState.value = val.reduce(
           (acc: Record<string, any>, cur: string) => {
-            acc[cur] = {
-              actived: false,
-              componentName: "span",
-              componentProps: {
-                __slot__: ""
-              }
-            };
+            console.log(cellSlotState.value)
+            if (cellSlotState.value[cur] && cellSlotState.value[cur].actived) {
+              acc[cur] = cellSlotState.value[cur]
+            } else {
+              acc[cur] = {
+                actived: false,
+                componentName: "span",
+                usedProp: '__slot__',
+                componentProps: {},
+              };
+            }
             return acc;
           },
           {}
         );
       },
       {
-        immediate: true
+        immediate: true,
       }
     );
 
@@ -314,7 +323,9 @@ export default defineComponent({
                   cellSlotState.value[column.property].componentName
                 }
                 componentProps={
-                  cellSlotState.value[column.property].componentProps
+                  {
+                    [cellSlotState.value[column.property].usedProp]: row[column.property]
+                  }
                 }
               />
             );
@@ -334,6 +345,7 @@ export default defineComponent({
         data.componentName;
       cellSlotState.value[cellContentState.value.prop].componentProps =
         data.componentProps;
+      cellSlotState.value[cellContentState.value.prop].usedProp = data.usedProp
     };
 
     const actionButtonState = ref<ActionButtonState[]>([]);
@@ -342,9 +354,9 @@ export default defineComponent({
       onConfirm({ text, action }: ActionButtonState) {
         actionButtonState.value.push({
           text,
-          action
+          action,
         });
-      }
+      },
     });
     /**
      * 渲染操作列表头
@@ -375,13 +387,40 @@ export default defineComponent({
         return (
           <div>
             <el-button type="text">添加</el-button>
-            {actionButtonState.value.map(item => {
+            {actionButtonState.value.map((item) => {
               return <el-button type="text">{item.text}</el-button>;
             })}
           </div>
         );
-      }
+      },
     };
+
+    /**
+     * 导出为文件
+     */
+    const exportAsFile = () => {
+      const slots: SlotType[] = Object.keys(cellSlotState.value).map(key => {
+        return {
+          name: key,
+          tag: cellSlotState.value[key].componentName,
+          mainProp: cellSlotState.value[key].usedProp,
+          componentProps: cellSlotState.value[key].componentProps
+        }
+      })
+
+      generateSFC({
+        slots,
+        componentProps: {
+          column: columns.value
+        },
+      })
+    }
+    
+    const handleCommand = (command: string) => {
+      if (command === 'export') {
+        exportAsFile()
+      }
+    }
 
     return {
       columns,
@@ -392,13 +431,15 @@ export default defineComponent({
       onColumnKeyChange,
       createColumnState,
       onCellDblclick,
+      cellSlotState,
       cellContentState,
       tableProps,
       onUpdateCellComponent,
       cellScopedSlots,
       actionScopedSlots,
       actionHeadContent,
-      actionColumnState
+      actionColumnState,
+      handleCommand
     };
   },
   render() {
@@ -412,7 +453,7 @@ export default defineComponent({
               vModel={this.columnKeys}
               onChange={this.onColumnKeyChange}
             >
-              {this.columns.map(item => {
+              {this.columns.map((item) => {
                 return (
                   <el-checkbox
                     key={item.prop}
@@ -437,7 +478,7 @@ export default defineComponent({
             ></el-button>
           </div>
           <div>
-            <el-dropdown>
+            <el-dropdown onCommand={this.handleCommand}>
               <el-button
                 size="small"
                 icon="el-icon-more"
@@ -445,7 +486,7 @@ export default defineComponent({
               ></el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item>预览</el-dropdown-item>
-                <el-dropdown-item>导出</el-dropdown-item>
+                <el-dropdown-item  command="export">导出</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
           </div>
@@ -455,8 +496,8 @@ export default defineComponent({
           <Crud
             {...{
               on: {
-                "cell-dblclick": this.onCellDblclick
-              }
+                "cell-dblclick": this.onCellDblclick,
+              },
             }}
             columns={this.columns}
             data={this.tableData}
@@ -474,8 +515,8 @@ export default defineComponent({
               "update:visible": () => {
                 this.createColumnState.visible = !this.createColumnState
                   .visible;
-              }
-            }
+              },
+            },
           }}
         />
         <CrudActionDialog
@@ -486,8 +527,8 @@ export default defineComponent({
               "update:visible": () => {
                 this.actionColumnState.visible = !this.actionColumnState
                   .visible;
-              }
-            }
+              },
+            },
           }}
         />
 
@@ -500,11 +541,11 @@ export default defineComponent({
             on: {
               "update:visible": () => {
                 this.cellContentState.visible = !this.cellContentState.visible;
-              }
-            }
+              },
+            },
           }}
         />
       </div>
     );
-  }
+  },
 });

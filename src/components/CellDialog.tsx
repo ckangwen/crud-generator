@@ -1,4 +1,4 @@
-import { defineComponent, computed, ref } from "@vue/composition-api";
+import { defineComponent, computed, ref } from '@vue/composition-api';
 import Preview from "./Preview";
 
 export type CellDialogProps = {
@@ -9,7 +9,17 @@ export type CellDialogProps = {
 export type CellDialogConfirmType = {
   componentName: string;
   componentProps: Record<string, any>;
+  usedProp: string
 };
+
+const supportElements = ["el-tag", "el-image", "el-switch", "el-input"]
+const tagAndUsedPropMapping: Record<string, any> = {
+  span: "__slot__",
+  "el-tag": "__slot__",
+  "el-image": "src",
+  "el-switch": "value",
+  "el-input": "value"
+}
 
 export default defineComponent({
   name: "CellDialog",
@@ -35,37 +45,28 @@ export default defineComponent({
       return props.column.property;
     });
 
-    const supportedTagsState = ref<{
-      tagEnums: string[];
-      propEnums: Record<string, any>;
-      componentName: string;
+    const scopedSlotPropState = ref<{
+      componentName: string
+      usedProp: string
     }>({
-      tagEnums: ["el-tag", "el-image", "el-switch", "el-input"],
-      propEnums: {
-        span: "__slot__",
-        "el-tag": "__slot__",
-        "el-image": "src",
-        "el-switch": "value",
-        "el-input": "value"
-      },
-      componentName: "span"
+      componentName: "span",
+      usedProp: '__slot__'
     });
+    const onComponentNameChange = (val: string) => {
+      scopedSlotPropState.value.usedProp = tagAndUsedPropMapping[val]
+    }
+
     /**
      * 将单元格的值应用到组件的哪个prop
      */
-    const componentProps = computed(() => {
-      return {
-        [supportedTagsState.value.propEnums[
-          supportedTagsState.value.componentName
-        ]]: props.row[prop.value]
-      };
-    });
+    const componentProps = ref({});
 
     const onConfirm = () => {
       ctx.emit("update:visible", !props.visible);
       ctx.emit("confirm", {
-        componentName: supportedTagsState.value.componentName,
-        componentProps: componentProps.value
+        componentName: scopedSlotPropState.value.componentName,
+        componentProps: componentProps.value,
+        usedProp: scopedSlotPropState.value.usedProp
       });
     };
     const onCancel = () => {
@@ -74,10 +75,11 @@ export default defineComponent({
 
     return {
       prop,
-      supportedTagsState,
+      scopedSlotPropState,
       onConfirm,
       onCancel,
-      componentProps
+      componentProps,
+      onComponentNameChange,
     };
   },
   render() {
@@ -91,8 +93,8 @@ export default defineComponent({
           <el-tab-pane label="Select">
             <div class="flex cross-center main-around">
               <div>选择需要替换称为的组件</div>
-              <el-select vModel={this.supportedTagsState.componentName}>
-                {this.supportedTagsState.tagEnums.map(item => {
+              <el-select vModel={this.scopedSlotPropState.componentName} onChange={this.onComponentNameChange}>
+                {supportElements.map(item => {
                   return (
                     <el-option key={item} label={item} value={item}></el-option>
                   );
@@ -102,8 +104,13 @@ export default defineComponent({
             <div style="text-align: left;">
               <div>预览</div>
               <Preview
-                componentName={this.supportedTagsState.componentName}
-                componentProps={this.componentProps}
+                componentName={this.scopedSlotPropState.componentName}
+                componentProps={
+                  {
+                    ...this.componentProps,
+                    [this.scopedSlotPropState.usedProp]: this.row[this.column.property]
+                  }
+                }
               />
             </div>
           </el-tab-pane>
