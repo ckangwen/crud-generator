@@ -2,6 +2,7 @@ import prettier from "prettier/esm/standalone.mjs";
 import parserBabel from "prettier/esm/parser-babel.mjs";
 import parserHtml from "prettier/esm/parser-html.mjs";
 import { camelCase } from 'lodash'
+import exportFile from "./exportFile";
 export type SlotType = {
   name: string
   tag: string
@@ -113,10 +114,14 @@ export function generateSFC({
       data: dataStr
     }
   )
-  const res2 = prettier.format(res, {
+  const content = prettier.format(res, {
     parser: "vue",
     plugins: [parserBabel, parserHtml],
   });
-  console.log(res2)
+
+  exportFile({
+    fileName: '',
+    content
+  })
 }
 

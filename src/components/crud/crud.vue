@@ -213,7 +213,8 @@ import TableMixin from "./mixins/table";
 import DataMixin from "./mixins/data";
 import PaginationMixin from "./mixins/pagination";
 import DialogMixin from "./mixins/dialog";
-export default {
+import { defineComponent } from "@vue/composition-api";
+export default defineComponent({
   mixins: [VnodesMixin, TableMixin, DataMixin, PaginationMixin, DialogMixin]
-};
+})
 </script>

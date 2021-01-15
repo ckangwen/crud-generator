@@ -1,17 +1,19 @@
 {
-  "name": "vue-composition-api-tsx-starter",
+  "name": "crud-generator",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "page": "deploy.sh"
   },
   "dependencies": {
     "@vue/composition-api": "^1.0.0-beta.23",
     "core-js": "^3.6.5",
     "element-ui": "^2.14.1",
+    "file-saver": "^2.0.5",
     "vue": "^2.6.11",
     "vue-router": "^3.2.0",
     "vuex": "^3.4.0"
@@ -19,6 +21,7 @@
   "devDependencies": {
     "@types/axios": "^0.14.0",
     "@types/faker": "^5.1.5",
+    "@types/file-saver": "^2.0.1",
     "@types/jest": "^24.0.19",
     "@types/lodash": "^4.14.167",
     "@types/prettier": "^2.1.6",
