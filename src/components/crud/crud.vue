@@ -93,8 +93,8 @@
         <!-- 操作列 -->
         <el-table-column v-bind="extraColumnProps">
           <template slot="header">
-            <template v-if="actionHeadContent">
-              <vnodes :render="actionHeadContent" />
+            <template v-if="extraHeadContent">
+              <vnodes :render="extraHeadContent" />
             </template>
             <span v-else>操作</span>
           </template>

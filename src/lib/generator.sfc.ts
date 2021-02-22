@@ -1,7 +1,7 @@
 import prettier from "prettier/esm/standalone.mjs";
 import parserBabel from "prettier/esm/parser-babel.mjs";
 import parserHtml from "prettier/esm/parser-html.mjs";
-import { camelCase } from 'lodash'
+import { camelCase, isEmpty } from 'lodash'
 import exportFile from "./exportFile";
 export type SlotType = {
   name: string
@@ -19,7 +19,7 @@ type AttrType = {
   value: any
 }
 
-export function generateSFC({
+export function generateCode({
   componentName = 'crud',
   componentProps = {},
   slots = [],
@@ -27,8 +27,8 @@ export function generateSFC({
   const buildTemplate = (
     componentTpl: string,
     {
-      data,
-      methods
+      data = '',
+      methods = ''
     }: Record<string, any> = {}) => {
     return `
     <template>
@@ -46,7 +46,7 @@ export function generateSFC({
       data() {
         return { ${data} }
       },
-      methods: { ${methods} }
+      ${methods ? `methods: { ${methods} }` : '' }
     }
     </script>
   `
@@ -62,7 +62,14 @@ export function generateSFC({
   const buildScopedSlots = (tag: string, slotName: string, mainProp: string, componentProps: Record<string, any> = {}) => {
     let slotComponent = ''
     let attrs = Object.keys(componentProps).map(key => {
-      return `${key}="${componentProps[key]}"`
+      const val = componentProps[key]
+      if (typeof val === 'object') {
+        return `:${key}='${JSON.stringify(val)}'`
+      }
+      if (typeof val === 'boolean' || typeof val === 'number') {
+        return `:${key}="${val}"`
+      }
+      return `${key}='${val}'`
     }).join(' ')
     if (mainProp === '__slot__') {
       slotComponent = `<${tag} ${attrs}>{{ scope.row[${slotName}] }}</${tag}>`
@@ -73,6 +80,7 @@ export function generateSFC({
 
       slotComponent = `<${tag} :${mainProp}="scope.row.${slotName}" ${attrs}></${tag}>`
     }
+    if (tag === 'span' && isEmpty(componentProps)) return ''
     return `
     <template v-slot:${slotName}="{ scope }">
       ${slotComponent}
@@ -111,7 +119,8 @@ export function generateSFC({
   const res = buildTemplate(
     buildComponent(attrStr, slotStr),
     {
-      data: dataStr
+      data: dataStr,
+      methods: ""
     }
   )
   const content = prettier.format(res, {
@@ -119,9 +128,28 @@ export function generateSFC({
     plugins: [parserBabel, parserHtml],
   });
 
+  return content
+}
+
+
+export function generateSFC({
+  componentName = 'crud',
+  componentProps = {},
+  slots = [],
+}: BuildContentType) {
+  const content = generateCode({
+    componentName,
+    componentProps,
+    slots
+  })
+
   exportFile({
     fileName: '',
     content
   })
-}
 
+  window.parent.postMessage({
+    key: 'code',
+    data: content
+  }, '*')
+}

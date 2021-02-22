@@ -8,12 +8,15 @@ import {
 } from "@vue/composition-api";
 import useTable, { fakerDataMap } from "@/use/useTable";
 
-import Crud from "@/components/crud/crud.vue";
+import Crud from "@ckangwen/crud";
 import CellDialog, { CellDialogConfirmType } from "@/components/CellDialog";
 import Preview from "@/components/Preview";
+import Codemirror from '@/components/codemirror.vue'
+import copy from 'clipboard-copy'
 
 import styles from "./index.module.scss";
-import { generateSFC, SlotType } from '../lib/generator.sfc';
+import { generateSFC, SlotType, generateCode } from '../lib/generator.sfc';
+import { Message } from 'element-ui';
 
 export type CellSlotType = {
   [K in string]: {
@@ -218,11 +221,64 @@ const CreateColumnDialog = defineComponent({
   },
 });
 
+const CodePreview = defineComponent({
+  name: 'CodePreview',
+  components: {
+    Codemirror
+  },
+  props: {
+    code: String,
+    visible: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  setup(props, ctx) {
+    const onClose = () => {
+      ctx.emit('update:visible', !props.visible)
+    }
+    const onCopy = () => {
+      if (!props.code) {
+        Message({
+          type: 'warning',
+          message: '代码为空'
+        })
+        return
+      }
+      Message({
+        type: 'success',
+        message: '代码复制成功'
+      })
+      copy(props.code)
+    }
+
+    return {
+      onClose,
+      onCopy
+    }
+  },
+  render() {
+    return (
+      <el-dialog
+        visible={this.visible}
+        placement="right"
+        title="代码"
+        width="80%"
+        {...{ on: { "update:visible": this.onClose } }}
+      >
+        <Codemirror code={this.code} />
+        <el-button style="margin-top: 20px; width: 120px" type="primary" size="small" onClick={this.onCopy}>复制</el-button>
+      </el-dialog>
+    )
+  }
+})
+
 export default defineComponent({
   components: {
     Crud,
     CrudActionDialog,
     CreateColumnDialog,
+    CodePreview
   },
   setup() {
     const { columns, columnKeys, fetch, columnMock } = useTable();
@@ -324,7 +380,8 @@ export default defineComponent({
                 }
                 componentProps={
                   {
-                    [cellSlotState.value[column.property].usedProp]: row[column.property]
+                    [cellSlotState.value[column.property].usedProp]: row[column.property],
+                    ...cellSlotState.value[cellContentState.value.prop].componentProps
                   }
                 }
               />
@@ -361,7 +418,7 @@ export default defineComponent({
     /**
      * 渲染操作列表头
      */
-    const actionHeadContent = () => {
+    const extraHeadContent = () => {
       return (
         <div>
           操作
@@ -415,10 +472,40 @@ export default defineComponent({
         },
       })
     }
-    
+
+    const codePreviewState = ref({
+      visible: false,
+      code: ''
+    })
+
+    const getCode = () => {
+      const slots: SlotType[] = Object.keys(cellSlotState.value).map(key => {
+        return {
+          name: key,
+          tag: cellSlotState.value[key].componentName,
+          mainProp: cellSlotState.value[key].usedProp,
+          componentProps: cellSlotState.value[key].componentProps
+        }
+      })
+
+      const code = generateCode({
+        slots,
+        componentProps: {
+          column: columns.value
+        },
+      })
+      codePreviewState.value.code = code
+      return code
+    }
+
+
     const handleCommand = (command: string) => {
       if (command === 'export') {
         exportAsFile()
+      }
+      if (command === 'code') {
+        getCode()
+        codePreviewState.value.visible = true
       }
     }
 
@@ -437,9 +524,10 @@ export default defineComponent({
       onUpdateCellComponent,
       cellScopedSlots,
       actionScopedSlots,
-      actionHeadContent,
+      extraHeadContent,
       actionColumnState,
-      handleCommand
+      handleCommand,
+      codePreviewState
     };
   },
   render() {
@@ -478,14 +566,14 @@ export default defineComponent({
             ></el-button>
           </div>
           <div>
-            <el-dropdown onCommand={this.handleCommand}>
+            <el-dropdown onCommand={this.handleCommand} trigger="click">
               <el-button
                 size="small"
                 icon="el-icon-more"
                 circle={true}
               ></el-button>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item>预览</el-dropdown-item>
+                <el-dropdown-item command="code">查看代码</el-dropdown-item>
                 <el-dropdown-item  command="export">导出</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
@@ -502,7 +590,7 @@ export default defineComponent({
             columns={this.columns}
             data={this.tableData}
             tableProps={this.tableProps}
-            actionHeadContent={this.actionHeadContent}
+            extraHeadContent={this.extraHeadContent}
             scopedSlots={{ ...this.cellScopedSlots, ...this.actionScopedSlots }}
           ></Crud>
         </div>
@@ -541,6 +629,17 @@ export default defineComponent({
             on: {
               "update:visible": () => {
                 this.cellContentState.visible = !this.cellContentState.visible;
+              },
+            },
+          }}
+        />
+        <CodePreview
+          visible={this.codePreviewState.visible}
+          code={this.codePreviewState.code}
+          {...{
+            on: {
+              "update:visible": () => {
+                this.codePreviewState.visible = !this.codePreviewState.visible;
               },
             },
           }}

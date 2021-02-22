@@ -846,6 +846,16 @@
     lodash "^4.17.19"
     to-fast-properties "^2.0.0"
 
+"@ckangwen/crud@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.npm.taobao.org/@ckangwen/crud/download/@ckangwen/crud-1.0.2.tgz#afb4ac461386737daa969726a9ab24f49799288c"
+  integrity sha1-r7SsRhOGc32qlpcmqask9JeZKIw=
+
+"@ckangwen/schema-form@^1.0.9":
+  version "1.0.9"
+  resolved "https://registry.npm.taobao.org/@ckangwen/schema-form/download/@ckangwen/schema-form-1.0.9.tgz#dbecab638ad8c210298982cb5bd8078c0d0b0dcf"
+  integrity sha1-2+yrY4rYwhApiYLLW9gHjA0LDc8=
+
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
   resolved "https://registry.npm.taobao.org/@cnakazawa/watch/download/@cnakazawa/watch-1.0.4.tgz#f864ae85004d0fcab6f50be9141c4da368d1656a"
@@ -3050,6 +3060,11 @@ cli-width@^3.0.0:
   resolved "https://registry.npm.taobao.org/cli-width/download/cli-width-3.0.0.tgz#a2f48437a2caa9a22436e794bf071ec9e61cedf6"
   integrity sha1-ovSEN6LKqaIkNueUvwceyeYc7fY=
 
+clipboard-copy@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.npm.taobao.org/clipboard-copy/download/clipboard-copy-4.0.1.tgz#326ef9726d4ffe72d9a82a7bbe19379de692017d"
+  integrity sha1-Mm75cm1P/nLZqCp7vhk3neaSAX0=
+
 clipboardy@^2.3.0:
   version "2.3.0"
   resolved "https://registry.npm.taobao.org/clipboardy/download/clipboardy-2.3.0.tgz#3c2903650c68e46a91b388985bc2774287dba290"
@@ -3109,6 +3124,11 @@ coa@^2.0.2:
     "@types/q" "^1.5.1"
     chalk "^2.4.1"
     q "^1.1.2"
+
+codemirror@^5.41.0:
+  version "5.59.2"
+  resolved "https://registry.npm.taobao.org/codemirror/download/codemirror-5.59.2.tgz?cache=0&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fcodemirror%2Fdownload%2Fcodemirror-5.59.2.tgz#ee674d3a4a8d241af38d52afc482625ba7393922"
+  integrity sha1-7mdNOkqNJBrzjVKvxIJiW6c5OSI=
 
 collection-visit@^1.0.0:
   version "1.0.0"
@@ -3829,6 +3849,11 @@ detect-node@^2.0.4:
   version "2.0.4"
   resolved "https://registry.npm.taobao.org/detect-node/download/detect-node-2.0.4.tgz#014ee8f8f669c5c58023da64b8179c083a28c46c"
   integrity sha1-AU7o+PZpxcWAI9pkuBecCDooxGw=
+
+diff-match-patch@^1.0.0:
+  version "1.0.5"
+  resolved "https://registry.npm.taobao.org/diff-match-patch/download/diff-match-patch-1.0.5.tgz#abb584d5f10cd1196dfc55aa03701592ae3f7b37"
+  integrity sha1-q7WE1fEM0Rlt/FWqA3AVkq4/ezc=
 
 diff-sequences@^24.9.0:
   version "24.9.0"
@@ -10145,6 +10170,14 @@ vm-browserify@^1.0.1:
   version "1.1.2"
   resolved "https://registry.npm.taobao.org/vm-browserify/download/vm-browserify-1.1.2.tgz#78641c488b8e6ca91a75f511e7a3b32a86e5dda0"
   integrity sha1-eGQcSIuObKkadfUR56OzKobl3aA=
+
+vue-codemirror@^4.0.6:
+  version "4.0.6"
+  resolved "https://registry.npm.taobao.org/vue-codemirror/download/vue-codemirror-4.0.6.tgz#b786bb80d8d762a93aab8e46f79a81006f0437c4"
+  integrity sha1-t4a7gNjXYqk6q45G95qBAG8EN8Q=
+  dependencies:
+    codemirror "^5.41.0"
+    diff-match-patch "^1.0.0"
 
 vue-eslint-parser@^7.0.0:
   version "7.3.0"

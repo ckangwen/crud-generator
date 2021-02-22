@@ -1,0 +1,10 @@
+.config-title {
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+.config-tab .el-form-item__content {
+  /*  */
+}
+.config-tab .el-select {
+  width: 100%;
+}

@@ -2,7 +2,10 @@ declare module "*.scss" {
   const content: any;
   export default content;
 }
-
+declare module "@ckangwen/crud" {
+  const content: any;
+  export default content;
+}
 declare module "prettier/esm/standalone.mjs" {
   const content: any;
   export default content;

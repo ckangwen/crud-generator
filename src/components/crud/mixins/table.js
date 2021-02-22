@@ -29,7 +29,7 @@ export default {
      * 剩余参数为当前列的表头信息和位置索引(同el-table的header插槽)$index, column
      */
     theadContent: Function,
-    actionHeadContent: Function,
+    extraHeadContent: Function,
     /**
      * 用于自定义渲染行数据
      * 第一个参数为渲染函数
