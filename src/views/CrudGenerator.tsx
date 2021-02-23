@@ -507,6 +507,16 @@ export default defineComponent({
         getCode()
         codePreviewState.value.visible = true
       }
+      if (command === 'message') {
+        const code = getCode()
+        window.parent.postMessage({
+          cmd: 'writeFile',
+          data: {
+            code: code,
+            fileName: `${Date.now()}.vue`
+          }
+        }, '*')
+      }
     }
 
     return {
@@ -575,6 +585,7 @@ export default defineComponent({
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item command="code">查看代码</el-dropdown-item>
                 <el-dropdown-item  command="export">导出</el-dropdown-item>
+                <el-dropdown-item  command="message">postMessage</el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
           </div>
